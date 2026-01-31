@@ -1,0 +1,40 @@
+[package]
+name = "short-it"
+version = "0.1.0"
+edition = "2021"  # Stable Rust edition
+
+[dependencies]
+# Web Framework - Axum is built on Tokio and Tower
+# Think of it like Fiber/Express but with Rust's type safety
+axum = "0.7"
+
+# Async Runtime - Required for async/await to work
+# Tokio is THE async runtime in Rust (like Node's event loop)
+tokio = { version = "1", features = ["full"] }
+
+# Diesel ORM - Type-safe database queries
+# The 'r2d2' feature adds connection pooling (like maintaining multiple DB connections)
+diesel = { version = "2", features = ["postgres", "r2d2", "chrono"] }
+
+# Serialization - Converts Rust structs to/from JSON
+# derive feature lets us use #[derive(Serialize, Deserialize)]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Environment variables - Load .env file
+dotenvy = "0.15"
+
+# Logging/Tracing - Structured logging for async code
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling - Makes error handling ergonomic
+thiserror = "1"  # For defining custom error types
+anyhow = "1"     # For easy error propagation
+
+# Date/Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Tower - Middleware layer (Axum is built on this)
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }

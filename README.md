@@ -1,46 +1,120 @@
 # short-it
-URL shortner in go
 
-## getting started
+URL shortener in Rust using Axum + Diesel + PostgreSQL.
 
-### setup
-1. clone
+## Tech Stack
+
+- **Axum** - Web framework
+- **Diesel** - ORM with compile-time query checking
+- **PostgreSQL** - Database
+- **Tokio** - Async runtime
+
+## Getting Started
+
+### Prerequisites
+
+- Rust (install via [rustup](https://rustup.rs/))
+- PostgreSQL
+- Diesel CLI
+
+```bash
+# Install Diesel CLI
+cargo install diesel_cli --no-default-features --features postgres
 ```
+
+### Setup
+
+1. Clone the repo
+```bash
 git clone git@github.com:thebluespecs/short-it.git
-```
-2. installing dependencies
-> [!note] building or running the server takes care of this in golang.
-
-### server
-1. Build, the server uses make as a build engine. This takes care of the dependencies of the project by itself.
-```
-make build
-```
-2. Running the server
-```
-make run 
-```
-3. Stop the process. While a simple `CTRL + c` should kill the process. The supporting container in the background
-would need the below command to stop
-```
-make stop
+cd short-it
 ```
 
-## Functionality and endpoints
-> [!note] assuming we are running on loopback adresses with port 8000
-1. shorten a URL
+2. Create `.env` file
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
 ```
-curl --location 'localhost:8000/shorten' \
---header 'Content-Type: application/json' \
---data '{
-    "url": "https://github.com/"
-}'
+
+Example `.env`:
 ```
-2. get info about the shortened url
+PORT=8000
+HOST=127.0.0.1
+DATABASE_URL=postgres://username@localhost:5432/short_it
 ```
-curl --location 'localhost:8000/:some_id/info'
+
+3. Create database and run migrations
+```bash
+createdb short_it
+diesel migration run
 ```
-3. redirection
+
+4. Run the server
+```bash
+cargo run
 ```
-curl --location 'localhost:8000/:some_id'
+
+## API Endpoints
+
+### Health Check
+```bash
+curl http://localhost:8000/
+```
+
+### Shorten a URL
+```bash
+curl -X POST http://localhost:8000/shorten \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://github.com/"}'
+```
+
+With expiration (in seconds):
+```bash
+curl -X POST http://localhost:8000/shorten \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://github.com/", "expires_in_seconds": 3600}'
+```
+
+### Get URL Info
+```bash
+curl http://localhost:8000/:code/info
+```
+
+### Redirect
+```bash
+curl -L http://localhost:8000/:code
+```
+
+## Project Structure
+
+```
+src/
+├── main.rs           # Entry point
+├── config.rs         # Environment configuration
+├── error.rs          # Error types
+├── models.rs         # Database models
+├── routes.rs         # Route definitions
+├── state.rs          # Application state
+├── db.rs             # Database module
+│   ├── schema.rs     # Diesel schema (auto-generated)
+│   └── repositories/ # Database operations
+├── services.rs       # Business logic module
+│   ├── base62.rs     # ID encoding
+│   └── url.rs        # URL service
+└── handlers.rs       # HTTP handlers
+    ├── health.rs
+    └── url.rs
+```
+
+## Migrations
+
+```bash
+# Create a new migration
+diesel migration generate <name>
+
+# Run migrations
+diesel migration run
+
+# Revert last migration
+diesel migration revert
 ```
